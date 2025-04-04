@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cartoon Music Typing Tutor</title>
+    <style>
+        /* Smooth scrolling for the whole page */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+            color: #333;
+            text-align: center;
+            padding: 20px;
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden;
+        }
+        
+        /* Header styles with scroll effect */
+        #header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        
+        #header.scrolled {
+            padding: 10px 0;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+        
+        .header-content {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+        
+        .header-title {
+            color: #ff6b6b;
+            margin: 0;
+            font-size: 1.5em;
+            transition: all 0.3s ease;
+        }
+        
+        #header.scrolled .header-title {
+            font-size: 1.2em;
+        }
+        
+        .main-content {
+            padding-top: 100px; /* Space for fixed header */
+            padding-bottom: 50px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: rgba(255,255,255,0.8);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        
+        .container.fade-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        h1 {
+            color: #ff6b6b;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .song-info {
+            margin: 20px 0;
+            font-size: 1.2em;
+        }
+        
+        .typing-area {
+            background-color: rgba(255,255,255,0.7);
+            border: 3px dashed #ff6b6b;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            min-height: 100px;
+        }
+        
+        .typing-container {
+            position: relative;
+            width: 100%;
+        }
+        
+        #userInput {
+            width: 100%;
+            padding: 12px;
+            font-size: 18px;
+            background-color: transparent;
+            border: 2px solid #4d96ff;
+            color: transparent;
+            caret-color: #333;
+            border-radius: 5px;
+            outline: none;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            position: relative;
+            z-index: 2;
+        }
+        
+        #highlight-mirror {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 12px;
+            font-size: 18px;
+            line-height: 1.5;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background-color: rgba(255,255,255,0.9);
+            border: 2px solid #4d96ff;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .correct-word {
+            color: #333;
+        }
+        
+        .incorrect-word {
+            color: #e74c3c;
+            text-decoration: underline;
+            background-color: rgba(231, 76, 60, 0.1);
+            border-radius: 3px;
+        }
+        
+        .controls {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        button {
+            background-color: #4d96ff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+        }
+        
+        button:hover {
+            background-color: #ff6b6b;
+            transform: scale(1.05);
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            font-size: 1.1em;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .stat-box {
+            background-color: rgba(77, 150, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 50px;
+            min-width: 120px;
+            border: 2px solid #4d96ff;
+        }
+        
+        .highlight {
+            transition: all 0.3s;
+        }
+        
+        .correct {
+            color: #2ecc71;
+        }
+        
+        .incorrect {
+            color: #e74c3c;
+            text-decoration: underline;
+        }
+        
+        .progress-container {
+            width: 100%;
+            background-color: rgba(255,255,255,0.5);
+            border-radius: 50px;
+            margin: 20px 0;
+            height: 20px;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #4d96ff, #6bc5ff);
+            border-radius: 50px;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .song-selector {
+            margin: 20px 0;
+        }
+        
+        select {
+            padding: 10px 20px;
+            border-radius: 50px;
+            background-color: white;
+            color: #333;
+            border: 2px solid #ff6b6b;
+            font-size: 16px;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 1em;
+        }
+        
+        .character {
+            position: absolute;
+            width: 80px;
+            transition: all 0.5s;
+            z-index: -1;
+        }
+        
+        /* NEW STYLES ADDED */
+        .speed-control {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .speed-control label {
+            font-weight: bold;
+        }
+        
+        .speed-control input {
+            width: 60px;
+            padding: 5px;
+            border-radius: 5px;
+            border: 2px solid #ff6b6b;
+            text-align: center;
+        }
+        
+        .lyrics-display {
+            background-color: rgba(255,255,255,0.7);
+            border: 3px dashed #4d96ff;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+            text-align: left;
+        }
+        
+        .lyrics-display p {
+            margin: 5px 0;
+            line-height: 1.5;
+        }
+        
+        /* Scroll to top button */
+        .scroll-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background-color: #ff6b6b;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 999;
+        }
+        
+        .scroll-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .scroll-top:hover {
+            background-color: #4d96ff;
+            transform: translateY(-5px);
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .stat-box {
+                min-width: 100px;
+                padding: 8px 15px;
+            }
+            
+            #header {
+                padding: 10px 0;
+            }
+            
+            .header-title {
+                font-size: 1.2em;
+            }
+            
+            .main-content {
+                padding-top: 80px;
+            }
+        }
+        
+        footer {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #555;
+            padding: 20px;
+            background-color: rgba(255,255,255,0.7);
+            border-radius: 15px;
+        }
+        
+    </style>
+</head>
+<body>
+    <!-- Added fixed header -->
+    <header id="header">
+        <div class="header-content">
+            <h1 class="header-title">🎵 Cartoon Music Typing Tutor 🎵</h1>
+        </div>
+    </header>
+    
+    <!-- Scroll to top button -->
+    <div class="scroll-top" id="scrollTopBtn">↑</div>
+    
+    <div class="main-content">
+        <img src="https://i.imgur.com/JDV8KQN.png" class="character" id="char1" style="top: 10%; left: 5%;">
+        <img src="https://i.imgur.com/4QV4ZJz.png" class="character" id="char2" style="top: 70%; left: 80%;">
+        
+        <div class="container fade-in">
+            <h1>🎵 Typing Tutor 🎵</h1>
+            <p>Type what you hear in cartoon theme songs!</p>
+            
+            <div class="song-selector">
+                <select id="songSelect">
+                    <option value="">Select a song</option>
+                    <optgroup label="Cartoon Themes">
+                        <option value="doraemon">Doraemon </option>
+                        <!-- <option value="pokemon">Pokemon </option> -->
+                        <option value="phineas">Phineas </option>
+                        <option value="shinchan">Shin Chan  </option>
+                        <option value="ninja">Ninja Hattori</option>
+                    </optgroup>
+                    <!-- <optgroup label="Popular Songs">
+                        <option value="tumhiho">Tum Hi Ho - Arijit Singh</option>
+                        <option value="gerua">Gerua - Pritam</option>
+                        <option value="faded">Faded - Alan Walker</option>
+                    </optgroup> -->
+                </select>
+            </div>
+            
+            <div class="song-info">
+                <div id="songTitle">No song selected</div>
+                <div id="songArtist"></div>
+            </div>
+            
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            
+            <div class="speed-control">
+                <label for="playbackSpeed">Playback Speed:</label>
+                <input type="number" id="playbackSpeed" min="0.5" max="2" step="0.1" value="1">
+                <span>x</span>
+            </div>
+            
+            <div class="controls">
+                <button id="playBtn">▶️ Play Song</button>
+                <button id="pauseBtn">⏸️ Pause</button>
+                <button id="restartBtn">🔄 Restart</button>
+                <button id="showLyricsBtn">📜 Show Lyrics</button>
+            </div>
+            
+            <div class="lyrics-display" id="lyricsDisplay"></div>
+            
+            <div class="typing-area">
+                <div class="typing-container">
+                    <textarea id="userInput" placeholder="Start typing the lyrics you hear..."></textarea>
+                    <div id="highlight-mirror"></div>
+                </div>
+            </div>
+            
+            <div class="stats">
+                <div class="stat-box">
+                    Accuracy: <span id="accuracy">0</span>%
+                </div>
+                <div class="stat-box">
+                    Speed: <span id="speed">0</span> WPM
+                </div>
+                <div class="stat-box">
+                    Progress: <span id="progress">0</span>%
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Created by Maruti</p>
+            <p>© Cartoon Music Typing Tutor</p>
+        </footer>
+    </div>
+
+    <script>
+        // Song data
+        const songs = {
+            "doraemon": {
+                title: "Doraemon Theme Song",
+                artist: "Hindi Version",
+                audio: "Doraemon.mp3", // Replace with actual file
+                lyrics: [
+                "Zindagi sawar doon",
+"Ik nayi bahar doon",
+"Duniya hi badal du main",
+"To pyara sa chamatkaar hoon",
+"Main kisi ka sapna hoon",
+"Jo aaj ban chuka hun sach",
+"Ab ye mera sapna hai ki",
+"Sabke sapne sach main karoon",
+"Aasman ko chhoo loon",
+"Titli ban udoon",
+"han han han",
+"Main hoon ek udta robot",
+"doraemon",
+"mano ya na mano",
+"main hoon ek udta robot",
+"doraemon",
+                ]
+            },
+            "pokemon": {
+                title: "Pokemon Theme Song",
+                artist: "Hindi Version",
+                audio: "https://music.amazon.com/podcasts/cbefc45c-c28f-4920-8678-b8d271dcb46d/episodes/4e3b42dc-eacf-489f-807d-94e1dae5a54c/bgm-india-banunga-mein-itna-zabardast-pokemon-opening-song-in-hindi-lyrics---bgm-india", // Replace with actual file
+                lyrics: [
+                    "pokemon gotta catch em all",
+                    "yeh hai mera dream",
+                    "pokemon gotta catch em all",
+                    "sachha hai yeh seem"
+                ]
+            },
+            "phineas": {
+                title: "Phineas and Ferb Theme",
+                artist: "English Version",
+                audio: "Garmi ki Chuttiya.mp3", // Replace with actual file
+                lyrics: [
+                    "garmi ki chhuttiyaan hoti hai badi lambi",
+
+"ho jaate hai bachche bade bor",
+"to samajhna ye hota hai bada mushkil",
+"kya kare kya kare yah",
+"jaise ki",
+"rocket mein udana ya mammi se ladana",
+"ya eiffel tower pe chadana",
+"jo hai hi nahin",
+"jo hai hi nahin usaka pata lagaana",
+"ya phir bandar ko nahaana",
+"paani mein chalana, frankenstein ka bheja dhundh ke laana vo yahaan par hai",
+"upar jaana, rolar chalaana",
+"ya bahan ko paagaal banaana phineas",
+"to dekha jae to, chhutiyo ke mausam mein ho sakata hai dhamaal come on peri",
+"hai kamaal ke phineas aur ferb kyunki ye karate hai kamaal",
+"hai kamaal ke phineas aur ferb kyunki ye karate hai kamaal",
+"mom phineas aur ferb taital sikuens bana rahe hai"
+                ]
+            },
+            "shinchan": {
+                title: "Shin Chan Theme Song",
+                artist: "Hindi Version",
+                audio: "Shin-Chan-Title.mp3", // Replace with actual file
+                lyrics: [
+                  "pagal yeh pagal woh",
+"pagal kar de jahan bhi ye jaye",
+"dekho karta hai kaisa deewana sabko",
+"mera naam bhi shin chan hai",
+"mein shararat se bhara",
+"badi mushkil mein padi",
+"meri family nohara",
+"c'mon baby c'mon baby",
+"aao karen dance shuru",
+"zorse ghume hum tum jhoome",
+"nacho nacho",
+"dekho sabko hila doon",
+"kabhi yeh uchhalta",
+"kabhi yeh machalta hai",
+"har dum bekaboo",
+"roz yeh karta hai",
+"nayi nayi gadbad",
+"tumko hasa dega shin chan"
+                ]
+            },
+            "ninja": {
+                title: "Ninja Hattori",
+                artist: "Theme Song",
+                audio: "Ninja-Hattori.mp3", // Replace with actual file
+                lyrics: [
+                   "main ninja hattori aaa gaya hoon",
+"pahadon ke upar jungloo ke paar",
+"dekho kaun apne shehar aaya yaar",
+"ninja hattori apne ghar aaya yaar",
+"badi badi aankhen aur muh hai chota sa",
+"sir pe hai topi aur gaal mota sa",
+"teji ka iski nahi koi thikana",
+"kitna hai pakka dekho iska nishana",
+"hattori hattori yeh hain apna yaar",
+"hasta aur hasatta hai yeh asli ninja",
+"main hoon ek ninja!",
+"cooldude jaisa iska style rahega",
+"dosto ke liye badi mehnat karega",
+"teji ka iski nahi koi thikana",
+"phir se hai pakka dekho iska nishana",
+"hattori hattori yeh hain apna yaar",
+"hasta aur hasatta hai yeh asli ninja",
+"main hoon ek ninja"
+                ]
+            },
+            "tumhiho": {
+                title: "Tum Hi Ho",
+                artist: "Arijit Singh",
+                audio: "https://example.com/tumhiho.mp3", // Replace with actual file
+                lyrics: [
+                    "tum hi ho",
+                    "bandhu mere saathi mere",
+                    "tum hi ho",
+                    "zindagi ab tum hi ho"
+                ]
+            },
+            "gerua": {
+                title: "Gerua",
+                artist: "Pritam, Arijit Singh",
+                audio: "https://example.com/gerua.mp3", // Replace with actual file
+                lyrics: [
+                    "rang de tu mohe gerua",
+                    "jab tak hai jaan",
+                    "jab tak hai jaan",
+                    "o rang de tu mohe gerua"
+                ]
+            },
+            "faded": {
+                title: "Faded",
+                artist: "Alan Walker",
+                audio: "https://example.com/faded.mp3", // Replace with actual file
+                lyrics: [
+                    "you were the shadow to my light",
+                    "did you feel us",
+                    "another star you fade away",
+                    "afraid our aim is out of sight"
+                ]
+            }
+        };
+        
+        // DOM elements
+        const songSelect = document.getElementById('songSelect');
+        const songTitle = document.getElementById('songTitle');
+        const songArtist = document.getElementById('songArtist');
+        const playBtn = document.getElementById('playBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        const userInput = document.getElementById('userInput');
+        const accuracyDisplay = document.getElementById('accuracy');
+        const speedDisplay = document.getElementById('speed');
+        const progressDisplay = document.getElementById('progress');
+        const progressBar = document.getElementById('progressBar');
+        const char1 = document.getElementById('char1');
+        const char2 = document.getElementById('char2');
+        const playbackSpeed = document.getElementById('playbackSpeed');
+        const showLyricsBtn = document.getElementById('showLyricsBtn');
+        const lyricsDisplay = document.getElementById('lyricsDisplay');
+        const scrollTopBtn = document.getElementById('scrollTopBtn');
+        const header = document.getElementById('header');
+        const highlightMirror = document.getElementById('highlight-mirror');
+        
+        // Audio element
+        const audio = new Audio();
+        let currentSong = null;
+        let startTime = null;
+        let correctChars = 0;
+        let totalChars = 0;
+        let timer = null;
+        
+        // Character animation
+        function animateCharacters() {
+            const pos1 = { top: 10, left: 5 };
+            const pos2 = { top: 70, left: 80 };
+            
+            setInterval(() => {
+                pos1.top += Math.random() * 2 - 1;
+                pos1.left += Math.random() * 2 - 1;
+                pos2.top += Math.random() * 2 - 1;
+                pos2.left += Math.random() * 2 - 1;
+                
+                // Keep within bounds
+                pos1.top = Math.max(5, Math.min(30, pos1.top));
+                pos1.left = Math.max(2, Math.min(15, pos1.left));
+                pos2.top = Math.max(60, Math.min(80, pos2.top));
+                pos2.left = Math.max(70, Math.min(90, pos2.left));
+                
+                char1.style.top = `${pos1.top}%`;
+                char1.style.left = `${pos1.left}%`;
+                char2.style.top = `${pos2.top}%`;
+                char2.style.left = `${pos2.left}%`;
+            }, 100);
+        }
+        
+        // Update playback speed
+        function updatePlaybackSpeed() {
+            let speed = parseFloat(playbackSpeed.value);
+            
+            // Validate speed value
+            if (isNaN(speed)) speed = 1;
+            if (speed < 0.5) speed = 0.5;
+            if (speed > 2) speed = 2;
+            
+            playbackSpeed.value = speed;
+            audio.playbackRate = speed;
+        }
+        
+        // Toggle lyrics display
+        function toggleLyricsDisplay() {
+            if (!currentSong) {
+                alert('Please select a song first!');
+                return;
+            }
+            
+            if (lyricsDisplay.style.display === 'block') {
+                lyricsDisplay.style.display = 'none';
+                showLyricsBtn.textContent = '📜 Show Lyrics';
+            } else {
+                // Display all lyrics
+                lyricsDisplay.innerHTML = '';
+                currentSong.lyrics.forEach(line => {
+                    const p = document.createElement('p');
+                    p.textContent = line;
+                    lyricsDisplay.appendChild(p);
+                });
+                lyricsDisplay.style.display = 'block';
+                showLyricsBtn.textContent = '❌ Hide Lyrics';
+                
+                // Scroll to lyrics section
+                lyricsDisplay.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+        
+        // Scroll to top function
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+        
+        // Show/hide scroll to top button
+        function toggleScrollTopButton() {
+            if (window.pageYOffset > 300) {
+                scrollTopBtn.classList.add('visible');
+                header.classList.add('scrolled');
+            } else {
+                scrollTopBtn.classList.remove('visible');
+                header.classList.remove('scrolled');
+            }
+        }
+        
+        // Initialize
+        function init() {
+            playBtn.addEventListener('click', playSong);
+            pauseBtn.addEventListener('click', pauseSong);
+            restartBtn.addEventListener('click', restartSong);
+            songSelect.addEventListener('change', selectSong);
+            userInput.addEventListener('input', checkTyping);
+            playbackSpeed.addEventListener('change', updatePlaybackSpeed);
+            showLyricsBtn.addEventListener('click', toggleLyricsDisplay);
+            scrollTopBtn.addEventListener('click', scrollToTop);
+            
+            // Add scroll event listeners
+            window.addEventListener('scroll', toggleScrollTopButton);
+            window.addEventListener('scroll', revealOnScroll);
+            
+            pauseBtn.disabled = true;
+            restartBtn.disabled = true;
+            userInput.disabled = true;
+            
+            animateCharacters();
+            revealOnScroll(); // Initial check for elements in view
+        }
+        
+        // Scroll reveal animation
+        function revealOnScroll() {
+            const elements = document.querySelectorAll('.container');
+            const windowHeight = window.innerHeight;
+            
+            elements.forEach(element => {
+                const elementPosition = element.getBoundingClientRect().top;
+                
+                if (elementPosition < windowHeight - 100) {
+                    element.classList.add('fade-in');
+                }
+            });
+        }
+        
+        // Song selection
+        function selectSong() {
+            const songId = songSelect.value;
+            if (!songId) return;
+            
+            currentSong = songs[songId];
+            songTitle.textContent = currentSong.title;
+            songArtist.textContent = currentSong.artist;
+            
+            // Hide lyrics display when changing songs
+            lyricsDisplay.style.display = 'none';
+            showLyricsBtn.textContent = '📜 Show Lyrics';
+            
+            // Change characters based on selection
+            if (songId === 'doraemon' || songId === 'shinchan') {
+                char1.src = "https://i.imgur.com/JDV8KQN.png"; // Doraemon
+                char2.src = "https://i.imgur.com/4QV4ZJz.png"; // Shinchan
+            } else if (songId === 'pokemon') {
+                char1.src = "https://i.imgur.com/Pikachu.png"; // Pikachu
+                char2.src = "https://i.imgur.com/Pokeball.png"; // Pokeball
+            } else if (songId === 'phineas') {
+                char1.src = "https://i.imgur.com/Phineas.png"; // Phineas
+                char2.src = "https://i.imgur.com/Ferb.png"; // Ferb
+            } else {
+                char1.src = "https://i.imgur.com/MusicNote1.png";
+                char2.src = "https://i.imgur.com/MusicNote2.png";
+            }
+            
+            audio.src = currentSong.audio;
+            
+            playBtn.disabled = false;
+            userInput.value = "";
+            highlightMirror.innerHTML = "";
+            resetStats();
+        }
+        
+        // Play song
+        function playSong() {
+            if (!currentSong) return;
+            
+            // Set initial playback speed
+            audio.playbackRate = parseFloat(playbackSpeed.value);
+            audio.play();
+            startTime = Date.now();
+            playBtn.disabled = true;
+            pauseBtn.disabled = false;
+            restartBtn.disabled = false;
+            userInput.disabled = false;
+            userInput.focus();
+            
+            // Start tracking WPM
+            timer = setInterval(calculateSpeed, 1000);
+        }
+        
+        // Pause song
+        function pauseSong() {
+            audio.pause();
+            playBtn.disabled = false;
+            pauseBtn.disabled = true;
+            clearInterval(timer);
+        }
+        
+        // Restart song
+        function restartSong() {
+            audio.currentTime = 0;
+            userInput.value = "";
+            highlightMirror.innerHTML = "";
+            resetStats();
+            if (audio.paused) {
+                audio.play();
+                playBtn.disabled = true;
+                pauseBtn.disabled = false;
+            }
+            startTime = Date.now();
+            userInput.focus();
+        }
+        
+        // Song finished
+        function songFinished() {
+            clearInterval(timer);
+            playBtn.disabled = false;
+            pauseBtn.disabled = true;
+        }
+        
+        // Check typing against lyrics and highlight incorrect words
+        function checkTyping() {
+            if (!currentSong) return;
+            
+            const typedText = userInput.value;
+            const fullLyrics = currentSong.lyrics.join(" ");
+            totalChars = fullLyrics.length;
+            
+            // Calculate correct characters and highlight incorrect words
+            correctChars = 0;
+            let highlightedText = "";
+            let currentWord = "";
+            let currentWordCorrect = true;
+            let wordStartPos = 0;
+            
+            for (let i = 0; i < typedText.length; i++) {
+                // Check if current character is correct
+                const charCorrect = typedText[i] === fullLyrics[i];
+                
+                if (charCorrect) {
+                    correctChars++;
+                } else {
+                    currentWordCorrect = false;
+                }
+                
+                // Build current word
+                currentWord += typedText[i];
+                
+                // Check for word boundaries (space or end of input)
+                if (typedText[i] === ' ' || i === typedText.length - 1) {
+                    if (!currentWordCorrect) {
+                        highlightedText += `<span class="incorrect-word">${currentWord}</span>`;
+                    } else {
+                        highlightedText += `<span class="correct-word">${currentWord}</span>`;
+                    }
+                    
+                    // Reset for next word
+                    currentWord = "";
+                    currentWordCorrect = true;
+                }
+            }
+            
+            // Add any remaining characters that didn't form complete words
+            if (currentWord.length > 0) {
+                if (!currentWordCorrect) {
+                    highlightedText += `<span class="incorrect-word">${currentWord}</span>`;
+                } else {
+                    highlightedText += `<span class="correct-word">${currentWord}</span>`;
+                }
+            }
+            
+            // Update the highlight mirror
+            highlightMirror.innerHTML = highlightedText;
+            
+            // Calculate accuracy
+            const accuracy = typedText.length > 0 ? Math.round((correctChars / typedText.length) * 100) : 0;
+            accuracyDisplay.textContent = isNaN(accuracy) ? 0 : accuracy;
+            
+            // Calculate progress
+            const progress = Math.round((typedText.length / fullLyrics.length) * 100);
+            progressDisplay.textContent = progress > 100 ? 100 : progress;
+            progressBar.style.width = `${progress > 100 ? 100 : progress}%`;
+        }
+        
+        // Calculate typing speed (WPM)
+        function calculateSpeed() {
+            if (!startTime) return;
+            
+            const timeElapsed = (Date.now() - startTime) / 60000; // in minutes
+            const words = userInput.value.trim().split(/\s+/).length;
+            const wpm = Math.round(words / timeElapsed);
+            speedDisplay.textContent = isNaN(wpm) ? 0 : wpm;
+        }
+        
+        // Reset statistics
+        function resetStats() {
+            correctChars = 0;
+            totalChars = 0;
+            accuracyDisplay.textContent = "0";
+            speedDisplay.textContent = "0";
+            progressDisplay.textContent = "0";
+            progressBar.style.width = "0%";
+            clearInterval(timer);
+        }
+
+        // Initialize the app
+        window.onload = init;
+    </script>
+</body>
+</html>
